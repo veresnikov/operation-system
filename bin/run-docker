@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+set -o errexit
+
+BUILDER_IMAGE=node:19.0.0
+
+echo "pulling $BUILDER_IMAGE..."
+docker pull "$BUILDER_IMAGE" >/dev/null
+
+USER_ID=$(id -u)
+GROUP_ID=$(id -g)
+SSH_DIR=$HOME/.ssh
+docker run \
+  --volume "/home:/home" \
+  --volume "/etc/passwd:/etc/passwd:ro" \
+  --volume "/etc/group:/etc/group:ro" \
+  --volume "/etc/shadow:/etc/shadow:ro" \
+  --volume "$PWD:$PWD" \
+  --workdir "$PWD" \
+  --user "$USER_ID:$GROUP_ID" \
+  -p "3000:3000" \
+  -it \
+  "$BUILDER_IMAGE" \
+  "$@"

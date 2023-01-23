@@ -1,0 +1,13 @@
+version: "3.3"
+
+services:
+  node:
+    image: node:19.0.0
+    volumes:
+      - "/home:/home"
+      - "/etc/passwd:/etc/passwd:ro"
+      - "/etc/group:/etc/group:ro"
+      - "/etc/shadow:/etc/shadow:ro"
+      - "./:/app/operation-system"
+    working_dir: "/app/operation-system"
+    user: "1000:1000"
