@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "build": "npx tsc"
+    "build": "npm install --force && npx tsc"
   },
   "keywords": [],
   "author": "",
@@ -18,8 +18,13 @@
   },
   "dependencies": {
     "@commander-js/extra-typings": "^10.0.1",
+    "@types/node": "^18.11.18",
+    "build": "^0.1.4",
     "commander": "^10.0.0",
     "csv": "^6.2.5",
-    "csv-parse": "^5.3.3"
+    "csv-parse": "^5.3.3",
+    "npm": "^9.3.1",
+    "run": "^1.4.0",
+    "ts-node": "^10.9.1"
   }
 }

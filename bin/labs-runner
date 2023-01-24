@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -o errexit
+
+BUILDER_IMAGE=node:19.0.0
+
+ARGS_LENGTH=$#
+
+if [[ $ARGS_LENGTH == 3 ]]; then
+    LAB=$1
+    INPUT=$2
+    OUTPUT=$3
+fi
+
+if [[ $ARGS_LENGTH == 4 ]]; then
+    LAB=$1
+    COMMAND=$2
+    INPUT=$3
+    OUTPUT=$4
+fi
+
+case $LAB in
+"lab1") LAB=src/lw1/lab1.ts ;;
+"lab2") LAB=src/lw2/lab2.ts ;;
+esac
+
+echo $LAB
+echo $COMMAND
+echo $INPUT
+echo $OUTPUT
+
+touch $OUTPUT
+
+echo "pulling $BUILDER_IMAGE..."
+docker pull "$BUILDER_IMAGE" >/dev/null
+
+docker run \
+  --volume "$PWD:$PWD" \
+  --workdir "$PWD" \
+  --volume "$PWD/$INPUT:$PWD/dist/input.csv" \
+  --volume "$PWD/$OUTPUT:$PWD/dist/output.csv" \
+  -it \
+  "$BUILDER_IMAGE" \
+  npx ts-node $LAB $COMMAND $INPUT $OUTPUT

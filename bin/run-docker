@@ -9,7 +9,6 @@ docker pull "$BUILDER_IMAGE" >/dev/null
 
 USER_ID=$(id -u)
 GROUP_ID=$(id -g)
-SSH_DIR=$HOME/.ssh
 docker run \
   --volume "/home:/home" \
   --volume "/etc/passwd:/etc/passwd:ro" \
