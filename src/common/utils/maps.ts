@@ -8,4 +8,17 @@ function Get<K, V>(maps: Map<K, V>, key: K): V | undefined {
     return result
 }
 
-export {Get}
+function Delete<K, V>(maps: Map<K, V>, key: K): boolean {
+    let keyInMap: K | null = null
+    maps.forEach((v, k) => {
+        if (JSON.stringify(k) === JSON.stringify(key) && k !== undefined && key !== undefined) {
+            keyInMap = k
+        }
+    })
+    if (keyInMap !== null) {
+        return maps.delete(keyInMap)
+    }
+    return false
+}
+
+export {Get, Delete}
