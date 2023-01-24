@@ -24,11 +24,6 @@ case $LAB in
 "lab2") LAB=src/lw2/lab2.ts ;;
 esac
 
-echo $LAB
-echo $COMMAND
-echo $INPUT
-echo $OUTPUT
-
 touch $OUTPUT
 
 echo "pulling $BUILDER_IMAGE..."
