@@ -22,6 +22,7 @@ fi
 case $LAB in
 "lab1") LAB=src/lw1/lab1.ts ;;
 "lab2") LAB=src/lw2/lab2.ts ;;
+"lab3-task1") LAB=src/lw3/lab3.ts ;;
 esac
 
 touch $OUTPUT

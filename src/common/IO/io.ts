@@ -2,9 +2,18 @@ import {parse} from 'csv-parse/sync'
 import {stringify} from 'csv-stringify/sync'
 import * as fs from "fs";
 import * as path from "path";
-import {DeterministicMoves, FromStateAndInputSymbol, Mealy, Moore, MoveWithSignals} from "../model/models";
-import {Get} from "../utils/maps";
-
+import {
+    DeterministicAutomaton,
+    DeterministicMoves,
+    FromStateAndInputSymbol,
+    Grammar,
+    GrammarSide,
+    Mealy,
+    Moore,
+    MoveWithSignals,
+    Rules
+} from "../model/models";
+import {Get, Set as set} from "../utils/maps";
 
 function ReadMealy(filename: string): Mealy {
     const data = readCSV(filename)
@@ -34,6 +43,72 @@ function WriteMealy(filename: string, mealy: Mealy): void {
     writeCSV(filename, prepareMealy(mealy))
 }
 
+function ReadGrammar(filename: string, grammarSide: GrammarSide): Grammar {
+    const filePath = path.resolve(filename)
+    const data = fs.readFileSync(filePath, 'utf-8').split(/\r?\n/)
+
+    const nonTerminals: string[] = []
+    const uniqueTerminals = new Set<string>();
+    const rules: Rules = new Map();
+    data.map(line => {
+        const rule = line.split(' -> ')
+        const sourceNonTerminal = rule[0]
+        nonTerminals.push(sourceNonTerminal)
+
+        rule[1].split(' | ').map(symbol => {
+            let [dstNonTerminal, terminal] = ["", ""]
+            if (symbol.length === 1) {
+                terminal = symbol
+            } else if (grammarSide === 'left') {
+                dstNonTerminal = symbol[0]
+                terminal = symbol[1]
+            } else if (grammarSide === 'right') {
+                dstNonTerminal = symbol[1]
+                terminal = symbol[0]
+            }
+            uniqueTerminals.add(terminal)
+            const k = {NonTerminal: sourceNonTerminal, Terminal: terminal}
+            set(rules, k, [...(Get(rules, k) ?? []), dstNonTerminal])
+        })
+    })
+
+    const terminalSymbols: string[] = []
+    uniqueTerminals.forEach(s => terminalSymbols.push(s))
+    return {nonTerminalSymbols: nonTerminals, rules: rules, side: grammarSide, terminalSymbols: terminalSymbols.sort()}
+}
+
+function WriteDeterministicAutomaton(filename: string, automaton: DeterministicAutomaton): void {
+    writeCSV(filename, prepareDeterministicAutomaton(automaton))
+}
+
+function prepareDeterministicAutomaton(automaton: DeterministicAutomaton): string[][] {
+    const result: string[][] = []
+    for (let i = 0; i < automaton.inputSymbols.length + 2; i++) {
+        result.push([])
+    }
+    result[0].push("")
+    result[1].push("")
+    automaton.states.map(state => {
+        if (Get(automaton.finalStates, state)) {
+            result[0].push('F')
+        } else {
+            result[0].push('')
+        }
+        result[1].push(state)
+    })
+    automaton.inputSymbols.map((symbol, i) => {
+        result[i + 2].push(symbol)
+        automaton.states.map(state => {
+            let dst = Get(automaton.moves, {state: state, symbol: symbol}) ?? ''
+            if (dst === '') {
+                dst = '-'
+            }
+            result[i + 2].push(dst)
+        })
+    })
+    return result
+}
+
 function getDeterministicMoves(data: string[][], states: string[], symbols: string[]): DeterministicMoves {
     const transposedData = transpose(data.slice(2))
     let result: DeterministicMoves = new Map()
@@ -44,7 +119,7 @@ function getDeterministicMoves(data: string[][], states: string[], symbols: stri
         const stateAndInput: FromStateAndInputSymbol = {
             state: states[i], symbol: symbols[j]
         }
-        result.set(stateAndInput, move)
+        set(result, stateAndInput, move)
     }))
     return result
 }
@@ -64,7 +139,7 @@ function getMooreStates(data: string[][]): { states: string[], signals: Map<stri
     const signals = new Map<string, string>;
     states.map((state, i) => {
         // @ts-ignore
-        signals.set(state, s[i])
+        Set(signals, state, s[i])
     })
     return {signals: signals, states: states}
 }
@@ -92,7 +167,7 @@ function getMovesWithSignals(data: string[][], states: string[], symbols: string
             state: states[i], symbol: symbols[j]
         }
         const [state, signal] = move.split('/')
-        result.set(stateAndInput, {signal: signal, state: state})
+        set(result, stateAndInput, {signal: signal, state: state})
     }))
     return result
 }
@@ -157,4 +232,4 @@ function writeCSV(filename: string, data: string[][]): void {
     fs.writeFileSync(filePath, csv, {flag: 'w'})
 }
 
-export {ReadMealy, ReadMoore, WriteMoore, WriteMealy}
+export {ReadMealy, ReadMoore, WriteMoore, WriteMealy, ReadGrammar, WriteDeterministicAutomaton}

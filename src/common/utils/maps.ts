@@ -21,4 +21,17 @@ function Delete<K, V>(maps: Map<K, V>, key: K): boolean {
     return false
 }
 
-export {Get, Delete}
+function Set<K, V>(maps: Map<K, V>, key: K, value: V): void {
+    let keyInMap: K | null = null
+    maps.forEach((v, k) => {
+        if (JSON.stringify(k) === JSON.stringify(key) && k !== undefined && key !== undefined) {
+            keyInMap = k
+        }
+    })
+    if (keyInMap === null) {
+        keyInMap = key
+    }
+    maps.set(keyInMap, value)
+}
+
+export {Get, Delete, Set}

@@ -1,6 +1,6 @@
 import {ReadMealy, ReadMoore, WriteMealy, WriteMoore} from "../../common/IO/io";
 import {DestStateAndSignal, FromStateAndInputSymbol, Mealy, Moore, MoveWithSignals} from "../../common/model/models";
-import {Get} from "../../common/utils/maps";
+import {Get, Set} from "../../common/utils/maps";
 
 function MealyToMoore(input: string, output: string): void {
     let mealy = ReadMealy(input)
@@ -23,7 +23,7 @@ function MooreToMealy(input: string, output: string): void {
 function getMealyMoves(automation: Moore): MoveWithSignals {
     const result: MoveWithSignals = new Map()
     automation.moves.forEach((value, key) => {
-        result.set(key, {
+        Set(result, key, {
             signal: Get(automation.stateSignals, value) as string, state: value
         })
     })
@@ -39,9 +39,9 @@ function createNewMooreStates(automation: Mealy): Map<string, DestStateAndSignal
         if (Get(processed, destStateAndSignal) ?? false) {
             return
         }
-        result.set('S' + c, destStateAndSignal)
+        Set(result, 'S' + c, destStateAndSignal)
         ++c
-        processed.set(destStateAndSignal, true)
+        Set(processed, destStateAndSignal, true)
     }))
     return result
 }
@@ -57,20 +57,20 @@ function getMooreStateIDs(states: Map<string, DestStateAndSignal>): string[] {
 function getMooreStateSignals(states: Map<string, DestStateAndSignal>): Map<string, string> {
     const result = new Map<string, string>();
     states.forEach((v, k) => {
-        result.set(k, v.signal)
+        Set(result, k, v.signal)
     })
     return result
 }
 
 function getMooreMoves(automation: Mealy, statesIDs: string[], states: Map<string, DestStateAndSignal>): Map<FromStateAndInputSymbol, string> {
     const stateToSignal = new Map<DestStateAndSignal, string>()
-    states.forEach((v, k) => stateToSignal.set(v, k))
+    states.forEach((v, k) => Set(stateToSignal, v, k))
     const result = new Map<FromStateAndInputSymbol, string>();
     statesIDs.map(id => {
         const oldState = (Get(states, id) as DestStateAndSignal).state
         automation.inputSymbols.map(symbol => {
             const dst = Get(automation.moves, {state: oldState, symbol: symbol}) as DestStateAndSignal
-            result.set({state: id, symbol: symbol}, Get(stateToSignal, dst) as string)
+            Set(result, {state: id, symbol: symbol}, Get(stateToSignal, dst) as string)
         })
     })
     return result

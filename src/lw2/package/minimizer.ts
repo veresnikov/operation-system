@@ -6,7 +6,7 @@ import {
     Mealy, Moore,
     MoveWithSignals
 } from "../../common/model/models";
-import {Delete, Get} from "../../common/utils/maps";
+import {Delete, Get, Set} from "../../common/utils/maps";
 
 function MinimizeMealy(input: string, output: string): void {
     let mealy = ReadMealy(input)
@@ -51,10 +51,10 @@ function getMinimizedMoore(moore: Moore, groupToState: Map<number, string[]>): M
         const state = states[0]
         const newState = 'S' + group
         states.map(oldState => {
-            oldStateToNewState.set(oldState, newState)
+            Set(oldStateToNewState, oldState, newState)
         })
         newStates.push(newState)
-        newStateSignals.set(newState, Get(moore.stateSignals, state) ?? '')
+        Set(newStateSignals, newState, Get(moore.stateSignals, state) ?? '')
     })
     const newMoves: DeterministicMoves = new Map();
     groupToState.forEach(states => {
@@ -62,7 +62,7 @@ function getMinimizedMoore(moore: Moore, groupToState: Map<number, string[]>): M
         moore.inputSymbols.map(symbol => {
             const oldDstState = Get(moore.moves, {state: state, symbol: symbol}) ?? ''
             const k: FromStateAndInputSymbol = {state: Get(oldStateToNewState, state) ?? '', symbol: symbol}
-            newMoves.set(k, Get(oldStateToNewState, oldDstState) ?? '')
+            Set(newMoves, k, Get(oldStateToNewState, oldDstState) ?? '')
         })
     })
     newStates.sort()
@@ -73,7 +73,7 @@ function removeUnavailableMooreStates(moore: Moore): Moore {
     const availableStates = new Map<string, boolean>;
     moore.moves.forEach((dest, from) => {
         if (from.state !== dest) {
-            availableStates.set(dest, true)
+            Set(availableStates, dest, true)
         }
     })
     const newStates: string[] = []
@@ -94,14 +94,14 @@ function getZeroEqualGroups(stateSignals: Map<string, string>): { groupToState: 
     const signalToStatesMap = new Map<string, string[]>();
     stateSignals.forEach((signal, state) => {
         const prev = Get(signalToStatesMap, signal) ?? []
-        signalToStatesMap.set(signal, [...prev, state])
+        Set(signalToStatesMap, signal, [...prev, state])
     })
     const groupToState = new Map<number, string[]>();
     let amount = 0
     signalToStatesMap.forEach(states => {
         states.map(state => {
             const prev = Get(groupToState, amount) ?? []
-            groupToState.set(amount, [...prev, state])
+            Set(groupToState, amount, [...prev, state])
         })
         amount++
     })
@@ -112,7 +112,7 @@ function removeUnavailableMealyStates(mealy: Mealy): Mealy {
     const availableStates = new Map<string, boolean>;
     mealy.moves.forEach((dest, from) => {
         if (from.state != dest.state) {
-            availableStates.set(dest.state, true)
+            Set(availableStates, dest.state, true)
         }
     })
 
@@ -134,7 +134,7 @@ function getOneEqualGroups(mealy: Mealy): { groupToState: Map<number, string[]>,
     mealy.states.map(source => mealy.inputSymbols.map(input => {
         const dstSignal = (Get(mealy.moves, {state: source, symbol: input}) as DestStateAndSignal).signal
         let prev = Get(stateToGroupHashMap, source) ?? ""
-        stateToGroupHashMap.set(source, prev + dstSignal)
+        Set(stateToGroupHashMap, source, prev + dstSignal)
     }))
     const groupHashToStatesMap = getGroupHashToStatesMap(stateToGroupHashMap)
     const groupToStatesMap = new Map<number, string[]>();
@@ -142,7 +142,7 @@ function getOneEqualGroups(mealy: Mealy): { groupToState: Map<number, string[]>,
     groupHashToStatesMap.forEach(states => {
             states.map(state => {
                 let prev = Get(groupToStatesMap, amount) ?? []
-                groupToStatesMap.set(amount, [...prev, state])
+                Set(groupToStatesMap, amount, [...prev, state])
             })
             amount++
         }
@@ -165,13 +165,13 @@ function getNextEqualGroups(
             const dst = Get(moves, {state: source, symbol: input}) as string
             const dstGroup = Get(stateToNewGroup, dst) ?? 0
             const prev = Get(stateToGroupHashMap, source) ?? ''
-            stateToGroupHashMap.set(source, prev + String(dstGroup))
+            Set(stateToGroupHashMap, source, prev + String(dstGroup))
         }))
         const groupHashToStatesMap = getGroupHashToStatesMap(stateToGroupHashMap)
         groupHashToStatesMap.forEach(newStates => {
                 newStates.map(state => {
                     const prev = Get(stateToNewGroupMap, amount) ?? []
-                    stateToNewGroupMap.set(amount, [...prev, state])
+                    Set(stateToNewGroupMap, amount, [...prev, state])
                 })
                 amount++
             }
@@ -182,7 +182,7 @@ function getNextEqualGroups(
 
 function optimizeMealyMoves(moves: MoveWithSignals): DeterministicMoves {
     const result: DeterministicMoves = new Map();
-    moves.forEach((dst, from) => result.set(from, dst.state))
+    moves.forEach((dst, from) => Set(result, from, dst.state))
     return result
 }
 
@@ -191,7 +191,7 @@ function getMinimizedMealy(mealy: Mealy, groupToStatesMap: Map<number, string[]>
     const newStates: string[] = []
     groupToStatesMap.forEach((oldStates, group) => {
         const newState = 'S' + group
-        oldStates.map(oldState => oldToNewStateMap.set(oldState, newState))
+        oldStates.map(oldState => Set(oldToNewStateMap, oldState, newState))
         newStates.push(newState)
     })
     const newMoves: MoveWithSignals = new Map()
@@ -200,7 +200,7 @@ function getMinimizedMealy(mealy: Mealy, groupToStatesMap: Map<number, string[]>
         mealy.inputSymbols.map(symbol => {
             const oldDstStateAndSignal = Get(mealy.moves, {state: state, symbol: symbol}) as DestStateAndSignal
             const newKey: FromStateAndInputSymbol = {state: Get(oldToNewStateMap, state) as string, symbol: symbol}
-            newMoves.set(newKey, {
+            Set(newMoves, newKey, {
                 signal: oldDstStateAndSignal.signal,
                 state: Get(oldToNewStateMap, oldDstStateAndSignal.state) as string ?? ''
             })
@@ -212,7 +212,7 @@ function getMinimizedMealy(mealy: Mealy, groupToStatesMap: Map<number, string[]>
 
 function getStateToGroupMap(groupToStatesMap: Map<number, string[]>): Map<string, number> {
     const result = new Map<string, number>();
-    groupToStatesMap.forEach((states, group) => states.map(state => result.set(state, group)))
+    groupToStatesMap.forEach((states, group) => states.map(state => Set(result, state, group)))
     return result
 }
 
@@ -220,7 +220,7 @@ function getGroupHashToStatesMap(stateToGroup: Map<string, string>): Map<string,
     let result = new Map<string, string[]>();
     stateToGroup.forEach((groupHash, state) => {
         let prev = Get(result, groupHash) ?? []
-        result.set(groupHash, [...prev, state])
+        Set(result, groupHash, [...prev, state])
     })
     return result
 }
