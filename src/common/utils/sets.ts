@@ -8,4 +8,10 @@ function Has<T>(set: Set<T>, value: T): boolean {
     return find
 }
 
-export {Has}
+function Add<T>(set: Set<T>, value: T) {
+    if (!Has(set, value)) {
+        set.add(value)
+    }
+}
+
+export {Has, Add}

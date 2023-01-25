@@ -1,5 +1,6 @@
 import {DeterministicAutomaton, DeterministicMoves, NonDeterministicAutomaton} from "../../common/model/models";
 import {Get, Set as set} from "../../common/utils/maps";
+import {Add, Has} from "../../common/utils/sets";
 
 function Determinate(automaton: NonDeterministicAutomaton): DeterministicAutomaton {
     const closures = getClosures(automaton)
@@ -12,8 +13,9 @@ function Determinate(automaton: NonDeterministicAutomaton): DeterministicAutomat
     while (stateQueue.length > 0) {
         const states = stateQueue[0]
         stateQueue = stateQueue.slice(1)
+
         const currState = getFullState(states, closures, automaton.finalStates)
-        const stateHash = states.join()
+        const stateHash = currState.states.sort().join('')
         if (Get(stateHashMap, stateHash)) {
             continue
         }
@@ -35,7 +37,7 @@ function Determinate(automaton: NonDeterministicAutomaton): DeterministicAutomat
             if (dstStates.length !== 0) {
                 stateQueue.push(dstStates)
                 const dstState = getFullState(dstStates, closures, automaton.finalStates)
-                set(newMoves, newKey, dstState.states.join())
+                set(newMoves, newKey, dstState.states.join(''))
             }
         })
     }
@@ -83,17 +85,17 @@ function getStatesNames(states: string[], finalStates: Map<string, boolean>, mov
 function getFullState(states: string[], closures: Map<string, state>, finalStates: Set<string>): state {
     const stateSet = new Set<string>();
     states.map(state => {
-        stateSet.add(state)
+        Add(stateSet, state)
         const closure = Get(closures, state)
         if (closure) {
-            closure.states.map(closureState => stateSet.add(closureState))
+            closure.states.map(closureState => Add(stateSet, closureState))
         }
     })
     const resultStates: string[] = []
     let final = false
     stateSet.forEach(state => {
         resultStates.push(state)
-        if (finalStates.has(state)) {
+        if (Has(finalStates, state)) {
             final = true
         }
     })
@@ -117,7 +119,7 @@ function getClosures(automaton: NonDeterministicAutomaton): Map<string, state> {
             if (final) {
                 return
             }
-            if (automaton.finalStates.has(closure)) {
+            if (Has(automaton.finalStates, closure)) {
                 final = true
             }
         })

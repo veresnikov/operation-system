@@ -6,8 +6,8 @@ import {Determinate} from "./determinator";
 function Convert(grammarSide: string, input: string, output: string): void {
     const grammar = ReadGrammar(input, toGrammarSide(grammarSide))
     const automaton = grammarToAutomaton(grammar)
-    console.log(automaton)
-    WriteDeterministicAutomaton(output, Determinate(automaton))
+    const result = Determinate(automaton)
+    WriteDeterministicAutomaton(output, result)
 }
 
 function grammarToAutomaton(grammar: Grammar): NonDeterministicAutomaton {
@@ -20,7 +20,6 @@ function grammarToAutomaton(grammar: Grammar): NonDeterministicAutomaton {
 }
 
 function leftImpl(grammar: Grammar): NonDeterministicAutomaton {
-    console.log(grammar)
     const states: string[] = ['H']
     grammar.nonTerminalSymbols.map(symbol => states.push(symbol))
     const finalStates = new Set<string>([states[1]])
@@ -34,7 +33,6 @@ function leftImpl(grammar: Grammar): NonDeterministicAutomaton {
 }
 
 function rightImpl(grammar: Grammar): NonDeterministicAutomaton {
-    console.log(grammar)
     const states: string[] = []
     grammar.nonTerminalSymbols.map(symbol => states.push(symbol))
     states.push('F')

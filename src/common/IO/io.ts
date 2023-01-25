@@ -14,6 +14,7 @@ import {
     Rules
 } from "../model/models";
 import {Get, Set as set} from "../utils/maps";
+import {Add} from "../utils/sets";
 
 function ReadMealy(filename: string): Mealy {
     const data = readCSV(filename)
@@ -66,7 +67,7 @@ function ReadGrammar(filename: string, grammarSide: GrammarSide): Grammar {
                 dstNonTerminal = symbol[1]
                 terminal = symbol[0]
             }
-            uniqueTerminals.add(terminal)
+            Add(uniqueTerminals, terminal)
             const k = {NonTerminal: sourceNonTerminal, Terminal: terminal}
             set(rules, k, [...(Get(rules, k) ?? []), dstNonTerminal])
         })
