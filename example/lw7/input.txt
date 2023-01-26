@@ -1,0 +1,7 @@
+a = ( a + 1 );
+b = "string";
+int a , b , c;
+float a;
+float a;
+b = a + ( b * a );
+bigID = 100 * 4;

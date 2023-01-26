@@ -78,6 +78,11 @@ function ReadGrammar(filename: string, grammarSide: GrammarSide): Grammar {
     return {nonTerminalSymbols: nonTerminals, rules: rules, side: grammarSide, terminalSymbols: terminalSymbols.sort()}
 }
 
+function ReadLines(filename: string): string[] {
+    const filePath = path.resolve(filename)
+    return  fs.readFileSync(filePath, 'utf-8').split(/\r?\n/)
+}
+
 function WriteDeterministicAutomaton(filename: string, automaton: DeterministicAutomaton): void {
     writeCSV(filename, prepareDeterministicAutomaton(automaton))
 }
@@ -275,5 +280,6 @@ export {
     WriteMealy,
     ReadGrammar,
     WriteDeterministicAutomaton,
-    ReadNonDeterministicAutomaton
+    ReadNonDeterministicAutomaton,
+    ReadLines
 }

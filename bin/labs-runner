@@ -6,11 +6,16 @@ BUILDER_IMAGE=node:19.0.0
 
 ARGS_LENGTH=$#
 
+if [[ $ARGS_LENGTH == 2 ]]; then
+    LAB=$1
+    INPUT=$2
+fi
 
 if [[ $ARGS_LENGTH == 3 ]]; then
     LAB=$1
     INPUT=$2
     OUTPUT=$3
+    touch $OUTPUT
 fi
 
 if [[ $ARGS_LENGTH == 4 ]]; then
@@ -18,6 +23,7 @@ if [[ $ARGS_LENGTH == 4 ]]; then
     COMMAND=$2
     INPUT=$3
     OUTPUT=$4
+    touch $OUTPUT
 fi
 
 case $LAB in
@@ -25,12 +31,23 @@ case $LAB in
 "lab2") LAB=src/lw2/lab2.ts ;;
 "lab3-task1") LAB=src/lw3/task1/lab3.ts ;;
 "lab3-task2") LAB=src/lw3/task2/lab3.ts ;;
+"lab7") LAB=src/lw7/lab7.ts ;;
 esac
 
-touch $OUTPUT
 
 echo "pulling $BUILDER_IMAGE..."
 docker pull "$BUILDER_IMAGE" >/dev/null
+
+if [[ $ARGS_LENGTH == 2 ]]; then
+docker run \
+  --volume "$PWD:$PWD" \
+  --workdir "$PWD" \
+  --volume "$PWD/$INPUT:$PWD/dist/input.csv" \
+  -it \
+  "$BUILDER_IMAGE" \
+  npx ts-node $LAB $INPUT
+  exit
+fi
 
 docker run \
   --volume "$PWD:$PWD" \
