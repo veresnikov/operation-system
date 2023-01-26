@@ -10,7 +10,7 @@ import {
     GrammarSide,
     Mealy,
     Moore,
-    MoveWithSignals,
+    MoveWithSignals, NonDeterministicAutomaton, NonDeterministicMoves,
     Rules
 } from "../model/models";
 import {Get, Set as set} from "../utils/maps";
@@ -82,6 +82,41 @@ function WriteDeterministicAutomaton(filename: string, automaton: DeterministicA
     writeCSV(filename, prepareDeterministicAutomaton(automaton))
 }
 
+function ReadNonDeterministicAutomaton(filename: string): NonDeterministicAutomaton {
+    const data = readCSV(filename)
+    const {states, signals} = getMooreStates(data)
+    const inputSymbols = getMooreInputSymbols(data)
+    return {
+        finalStates: getFinalStates(signals),
+        inputSymbols: inputSymbols,
+        moves: getNonDeterministicMoves(data, states, inputSymbols),
+        states: states
+    }
+}
+
+function getFinalStates(signals: Map<string, string>): Set<string> {
+    const result = new Set<string>();
+    signals.forEach((signal, state) => {
+        if (signal === 'F') {
+            Add(result, state)
+        }
+    })
+    return result
+}
+
+function getNonDeterministicMoves(data: string[][], states: string[], inputSymbols: string[]): NonDeterministicMoves {
+    const transposedData = transpose(data.slice(2))
+    const result: NonDeterministicMoves = new Map();
+    transposedData.slice(1).map((stateWithMoves, i) => stateWithMoves.map((moves, j) => {
+        if (moves === '-') {
+            return
+        }
+        const k = {state: states[i], symbol: inputSymbols[j]}
+        moves.split(',').map(move => set(result, k, [...(Get(result, k) ?? []), move]))
+    }))
+    return result
+}
+
 function prepareDeterministicAutomaton(automaton: DeterministicAutomaton): string[][] {
     const result: string[][] = []
     for (let i = 0; i < automaton.inputSymbols.length + 2; i++) {
@@ -140,7 +175,7 @@ function getMooreStates(data: string[][]): { states: string[], signals: Map<stri
     const signals = new Map<string, string>;
     states.map((state, i) => {
         // @ts-ignore
-        Set(signals, state, s[i])
+        set(signals, state, s[i])
     })
     return {signals: signals, states: states}
 }
@@ -233,4 +268,12 @@ function writeCSV(filename: string, data: string[][]): void {
     fs.writeFileSync(filePath, csv, {flag: 'w'})
 }
 
-export {ReadMealy, ReadMoore, WriteMoore, WriteMealy, ReadGrammar, WriteDeterministicAutomaton}
+export {
+    ReadMealy,
+    ReadMoore,
+    WriteMoore,
+    WriteMealy,
+    ReadGrammar,
+    WriteDeterministicAutomaton,
+    ReadNonDeterministicAutomaton
+}

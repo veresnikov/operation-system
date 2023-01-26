@@ -1,6 +1,6 @@
-import {DeterministicAutomaton, DeterministicMoves, NonDeterministicAutomaton} from "../../common/model/models";
-import {Get, Set as set} from "../../common/utils/maps";
-import {Add, Has} from "../../common/utils/sets";
+import {DeterministicAutomaton, DeterministicMoves, NonDeterministicAutomaton} from "../../../common/model/models";
+import {Get, Set as set} from "../../../common/utils/maps";
+import {Add, Has} from "../../../common/utils/sets";
 
 function Determinate(automaton: NonDeterministicAutomaton): DeterministicAutomaton {
     const closures = getClosures(automaton)

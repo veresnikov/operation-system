@@ -1,6 +1,6 @@
-import {ReadGrammar, WriteDeterministicAutomaton} from "../../common/IO/io";
-import {Grammar, GrammarSide, NonDeterministicAutomaton, NonDeterministicMoves} from "../../common/model/models";
-import {Get, Set as set} from "../../common/utils/maps";
+import {ReadGrammar, WriteDeterministicAutomaton} from "../../../common/IO/io";
+import {Grammar, GrammarSide, NonDeterministicAutomaton, NonDeterministicMoves} from "../../../common/model/models";
+import {Get, Set as set} from "../../../common/utils/maps";
 import {Determinate} from "./determinator";
 
 function Convert(grammarSide: string, input: string, output: string): void {
