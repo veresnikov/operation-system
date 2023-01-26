@@ -17,6 +17,7 @@ docker run \
   --volume "$PWD:$PWD" \
   --workdir "$PWD" \
   --user "$USER_ID:$GROUP_ID" \
+  --rm \
   -p "3000:3000" \
   -it \
   "$BUILDER_IMAGE" \

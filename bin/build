@@ -10,6 +10,7 @@ docker pull "$BUILDER_IMAGE" >/dev/null
 docker run \
   --volume "$PWD:$PWD" \
   --workdir "$PWD" \
+  --rm \
   -it \
   "$BUILDER_IMAGE" \
   npm install

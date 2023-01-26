@@ -43,6 +43,7 @@ docker run \
   --volume "$PWD:$PWD" \
   --workdir "$PWD" \
   --volume "$PWD/$INPUT:$PWD/dist/input.csv" \
+  --rm \
   -it \
   "$BUILDER_IMAGE" \
   npx ts-node $LAB $INPUT
@@ -54,6 +55,7 @@ docker run \
   --workdir "$PWD" \
   --volume "$PWD/$INPUT:$PWD/dist/input.csv" \
   --volume "$PWD/$OUTPUT:$PWD/dist/output.csv" \
+  --rm \
   -it \
   "$BUILDER_IMAGE" \
   npx ts-node $LAB $COMMAND $INPUT $OUTPUT
