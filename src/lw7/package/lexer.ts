@@ -15,14 +15,12 @@ function GetTokens(input: string): Token[] {
                 delimiter = 1
             }
             lexeme = lexeme.slice(0, delimiter)
-            tokens.push(parse(lexeme, linePos, cursor))
-            data[linePos] = data[linePos].slice(data[linePos].length === 1 ? delimiter + 1 : delimiter + 1)
-            cursor += delimiter + 1
-            if (data[linePos].length === 1) {
-                lexeme = data[linePos]
-                console.log(lexeme)
-                tokens.push(parse(lexeme, linePos, cursor + 1))
+            if (data[linePos].length > 2) {
+                delimiter++
             }
+            tokens.push(parse(lexeme, linePos, cursor))
+            data[linePos] = data[linePos].slice(delimiter)
+            cursor += delimiter
         }
     }
     return tokens
@@ -31,7 +29,7 @@ function GetTokens(input: string): Token[] {
 function parse(data: string, line: number, column: number): Token {
     const type = Parse(data)
     if (type === TokenType.ERROR) {
-        throw new Error("Wrong lexeme at position. On line: " + line + " On position: " + column + " Lexem: " + data)
+        throw new Error("Wrong lexeme at position. On line: " + line + " On position: " + column + " Lexeme: " + '"' + data + '"')
     }
     if (type === TokenType.COMMENT) {
         throw new Error("Comment is not required")
