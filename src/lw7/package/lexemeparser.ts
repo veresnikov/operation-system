@@ -2,10 +2,10 @@ import {TokenType} from "./token";
 
 const keywords = [
     'int', 'float', 'while', 'const', 'let', 'if', 'for', 'boolean', 'false', 'true', 'return', 'break', 'continue',
-    'else', 'switch', 'case', 'default'
+    'else', 'switch', 'case', 'default', 'function', 'write'
 ]
 
-const separators = [';', ',', '(', ')', '{', '}', '[', ']']
+const separators = [';', ',', '(', ')', '{', '}', '[', ']', ':', '{', '}']
 
 const logical = ['>', '<', '==', '!=', '>=', '<=', '&&', '||']
 

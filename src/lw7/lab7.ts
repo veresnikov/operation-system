@@ -1,5 +1,6 @@
 import {Command} from '@commander-js/extra-typings';
 import {GetTokens} from "./package/lexer";
+import {TokenToString} from "./package/token";
 
 const program = new Command()
 program
@@ -10,7 +11,8 @@ program
             if (options.args.length !== 1) {
                 throw new Error('usage: bin/labs-runner lab7 [input csv filename]')
             }
-            console.log(GetTokens(options.args[0]))
+            const tokens = GetTokens(options.args[0])
+            tokens.map(token => console.log(TokenToString(token)))
 
         } catch (e) {
             const err = e as Error

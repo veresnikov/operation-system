@@ -4,22 +4,26 @@ import {Parse} from "./lexemeparser";
 
 function GetTokens(input: string): Token[] {
     const tokens: Token[] = []
-
     let data = ReadLines(input)
-    for (let linePos = 0; linePos < data.length; linePos++) {
+    for (let lineIndex = 0; lineIndex < data.length; lineIndex++) {
         let cursor = 0
-        while (data[linePos].length > 0) {
-            let delimiter = find(data[linePos], (ch) => ch === ' ')
-            let lexeme = data[linePos]
+        while (data[lineIndex].length > 0) {
+            let delimiter = find(data[lineIndex], (ch) => ch === ' ')
+            if (data[lineIndex][cursor] === ' ') {
+                data[lineIndex] = data[lineIndex].slice(2)
+                cursor++
+                continue
+            }
+            let lexeme = data[lineIndex]
             if (delimiter === -1) {
                 delimiter = 1
             }
             lexeme = lexeme.slice(0, delimiter)
-            if (data[linePos].length > 2) {
+            if (data[lineIndex].length > 2) {
                 delimiter++
             }
-            tokens.push(parse(lexeme, linePos, cursor))
-            data[linePos] = data[linePos].slice(delimiter)
+            tokens.push(parse(lexeme, lineIndex + 1, cursor + 1))
+            data[lineIndex] = data[lineIndex].slice(delimiter)
             cursor += delimiter
         }
     }

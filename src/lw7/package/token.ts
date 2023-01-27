@@ -22,5 +22,9 @@ type Token = {
     column: number
 }
 
-export {TokenType}
+function TokenToString(token: Token): string {
+    return token.type.toString() + ' ' + '"' + token.lexeme + '"' + ' ' + '[' + token.line + ',' + token.column + ']'
+}
+
+export {TokenType, TokenToString}
 export type {Token}
