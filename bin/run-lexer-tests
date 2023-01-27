@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -o errexit
+
+INPUT_FILES=($(ls example/lw7/ | grep input))
+OUTPUT_FILES=($(ls example/lw7/ | grep output))
+COUNT_FILES=$(ls example/lw7/ | grep input | wc -l)
+
+for (( i = 0; i < COUNT_FILES; i++ )) do
+  TMP_FILE=dist/tmp.txt
+  touch "$TMP_FILE"
+  ./bin/labs-runner lab7 example/lw7/${INPUT_FILES[i]} "$TMP_FILE"
+  diff example/lw7/${OUTPUT_FILES[i]} "$TMP_FILE" || exit 1
+  rm "$TMP_FILE"
+done

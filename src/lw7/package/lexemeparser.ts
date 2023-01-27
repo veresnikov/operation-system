@@ -130,10 +130,10 @@ function isNumber(data: string): boolean {
 }
 
 const validators: Map<TokenType, validator> = new Map<TokenType, validator>([
+    [TokenType.NUMBER, isNumber],
     [TokenType.KEYWORD, isKeyword],
     [TokenType.IDENTIFIER, isIdentifier],
     [TokenType.ASSIGMENT, isAssigment],
-    [TokenType.NUMBER, isNumber],
     [TokenType.SEPARATOR, isSeparators],
     [TokenType.PLUS, isPlus],
     [TokenType.MINUS, isMinus],

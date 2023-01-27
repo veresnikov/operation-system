@@ -273,6 +273,11 @@ function writeCSV(filename: string, data: string[][]): void {
     fs.writeFileSync(filePath, csv, {flag: 'w'})
 }
 
+function WriteToFile(filename: string, data: string): void {
+    const filePath = path.resolve(filename)
+    fs.appendFileSync(filePath, data + '\n')
+}
+
 export {
     ReadMealy,
     ReadMoore,
@@ -281,5 +286,6 @@ export {
     ReadGrammar,
     WriteDeterministicAutomaton,
     ReadNonDeterministicAutomaton,
-    ReadLines
+    ReadLines,
+    WriteToFile
 }

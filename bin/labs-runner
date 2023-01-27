@@ -6,11 +6,6 @@ BUILDER_IMAGE=node:19.0.0
 
 ARGS_LENGTH=$#
 
-if [[ $ARGS_LENGTH == 2 ]]; then
-    LAB=$1
-    INPUT=$2
-fi
-
 if [[ $ARGS_LENGTH == 3 ]]; then
     LAB=$1
     INPUT=$2
@@ -38,17 +33,6 @@ esac
 echo "pulling $BUILDER_IMAGE..."
 docker pull "$BUILDER_IMAGE" >/dev/null
 
-if [[ $ARGS_LENGTH == 2 ]]; then
-docker run \
-  --volume "$PWD:$PWD" \
-  --workdir "$PWD" \
-  --volume "$PWD/$INPUT:$PWD/dist/input.csv" \
-  --rm \
-  -it \
-  "$BUILDER_IMAGE" \
-  npx ts-node $LAB $INPUT
-  exit
-fi
 
 docker run \
   --volume "$PWD:$PWD" \
