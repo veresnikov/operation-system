@@ -10,7 +10,7 @@ function GetTokens(input: string): Token[] {
         while (data[lineIndex].length > 0) {
             try {
                 let delimiter = find(data[lineIndex], (ch) => ch === ' ')
-                if (data[lineIndex][cursor] === ' ') {
+                if (data[lineIndex][0] === ' ') {
                     data[lineIndex] = data[lineIndex].slice(2)
                     cursor++
                     continue
@@ -26,6 +26,9 @@ function GetTokens(input: string): Token[] {
                 lexeme = lexeme.slice(0, delimiter)
                 if (data[lineIndex].length > 2) {
                     delimiter++
+                }
+                if (lexeme === '') {
+                    return []
                 }
                 tokens.push(parse(lexeme, lineIndex + 1, cursor + 1))
                 data[lineIndex] = data[lineIndex].slice(delimiter)

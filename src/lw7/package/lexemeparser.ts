@@ -5,7 +5,7 @@ const keywords = [
     'else', 'switch', 'case', 'default', 'function', 'write'
 ]
 
-const separators = [';', ',', '(', ')', '{', '}', '[', ']', ':', '{', '}']
+const separators = [';', ',', '(', ')', '{', '}', '[', ']', ':']
 
 const logical = ['>', '<', '==', '!=', '>=', '<=', '&&', '||']
 
