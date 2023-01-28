@@ -1,10 +1,14 @@
-import {DeterministicAutomaton, DeterministicMoves, NonDeterministicAutomaton} from "../../../common/model/models";
+import {
+    DeterministicAutomaton,
+    DeterministicMoves,
+    FromStateAndInputSymbol,
+    NonDeterministicAutomaton
+} from "../../../common/model/models";
 import {Get, Set as set} from "../../../common/utils/maps";
 import {Add, Has} from "../../../common/utils/sets";
 
 function Determinate(automaton: NonDeterministicAutomaton): DeterministicAutomaton {
     const closures = getClosures(automaton)
-    console.log('123', closures)
     const stateHashMap = new Map<string, state>();
     const newStates: string[] = []
     const newFinalStates = new Map<string, boolean>();
@@ -105,22 +109,23 @@ function getFullState(states: string[], closures: Map<string, state>, finalState
 }
 
 function getClosures(automaton: NonDeterministicAutomaton): Map<string, state> {
-    const flatClosures = new Map<string, string[]>();
-    console.log(automaton.moves)
-    automaton.states.map(state => (Get(automaton.moves, {state: state, symbol: 'e'}) ?? [])
-        .map(dstState =>
-            set(
-                flatClosures,
-                state,
-                [...Get(flatClosures, state) ?? [], dstState]
-            )
-        )
-    )
+    let flatClosures = new Map<string, string[]>();
+    automaton.states.map((state) => {
+        let k = {state: state, symbol: 'e'};
+        (Get(automaton.moves, k) ?? []).map((dstState) => {
+            const prev = Get(flatClosures, state) ?? []
+            set(flatClosures, state, [...prev, dstState])
+        })
+    })
     if (flatClosures.size === 0) {
         return new Map<string, state>();
     }
-    console.log(4353, flatClosures)
-    while (recurse(flatClosures)) {
+    while (true) {
+        let [found, newClosures] = recurse(flatClosures)
+        flatClosures = newClosures
+        if (!found) {
+            break
+        }
     }
     const result = new Map<string, state>();
     flatClosures.forEach((closures, state) => {
@@ -138,16 +143,18 @@ function getClosures(automaton: NonDeterministicAutomaton): Map<string, state> {
     return result
 }
 
-function recurse(result: Map<string, string[]>): boolean {
+function recurse(result: Map<string, string[]>): [boolean, Map<string, string[]>] {
     let found = false
-    result.forEach((closures, state) => closures.map(closure => (Get(result, closure) ?? []).map(transitiveState => {
-        if (existInArray(Get(result, closure) ?? [], transitiveState)) {
-            return
-        }
-        set(result, state, [...(Get(result, state) ?? []), transitiveState])
-        found = true
-    })))
-    return found
+    result.forEach((closures, state) => {
+        closures.map(closure => (Get(result, closure) ?? []).map(transitiveState => {
+            if (existInArray(Get(result, state) ?? [], transitiveState)) {
+                return
+            }
+            set(result, state, [...(Get(result, state) ?? []), transitiveState])
+            found = true
+        }))
+    })
+    return [found, result]
 }
 
 function existInArray(arr: string[], find: string): boolean {
