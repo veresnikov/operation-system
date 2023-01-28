@@ -22,7 +22,7 @@ function grammarToAutomaton(grammar: Grammar): NonDeterministicAutomaton {
 function leftImpl(grammar: Grammar): NonDeterministicAutomaton {
     const states: string[] = ['H']
     grammar.nonTerminalSymbols.map(symbol => states.push(symbol))
-    const finalStates = new Set<string>([states[1]])
+    const finalStates = new Map<string, boolean>([[states[1], true]])
     const moves: NonDeterministicMoves = new Map()
     grammar.rules.forEach((dstNonTerminals, nonTerminalWithTerminal) => dstNonTerminals.map(dstNonTerminal => {
         const initState = dstNonTerminal !== '' ? dstNonTerminal : 'H'
@@ -36,7 +36,7 @@ function rightImpl(grammar: Grammar): NonDeterministicAutomaton {
     const states: string[] = []
     grammar.nonTerminalSymbols.map(symbol => states.push(symbol))
     states.push('F')
-    const finalStates = new Set<string>(['F'])
+    const finalStates = new Map<string, boolean>([['F', true]])
     const moves: NonDeterministicMoves = new Map()
     grammar.rules.forEach((dstNonTerminals, nonTerminalWithTerminal) => {
         const k = {state: nonTerminalWithTerminal.NonTerminal, symbol: nonTerminalWithTerminal.Terminal}

@@ -1,6 +1,5 @@
 enum TokenType {
     IDENTIFIER = 'IDENTIFIER',
-
     KEYWORD = 'KEYWORD',
     NUMBER = 'NUMBER',
     SEPARATOR = 'SEPARATOR',

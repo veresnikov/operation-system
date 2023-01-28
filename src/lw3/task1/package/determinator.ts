@@ -4,6 +4,7 @@ import {Add, Has} from "../../../common/utils/sets";
 
 function Determinate(automaton: NonDeterministicAutomaton): DeterministicAutomaton {
     const closures = getClosures(automaton)
+    console.log('123', closures)
     const stateHashMap = new Map<string, state>();
     const newStates: string[] = []
     const newFinalStates = new Map<string, boolean>();
@@ -82,20 +83,20 @@ function getStatesNames(states: string[], finalStates: Map<string, boolean>, mov
     return [newStates, newFinalStates, newMoves]
 }
 
-function getFullState(states: string[], closures: Map<string, state>, finalStates: Set<string>): state {
-    const stateSet = new Set<string>();
+function getFullState(states: string[], closures: Map<string, state>, finalStates: Map<string, boolean>): state {
+    const stateMap = new Map<string, boolean>();
     states.map(state => {
-        Add(stateSet, state)
+        set(stateMap, state, true)
         const closure = Get(closures, state)
         if (closure) {
-            closure.states.map(closureState => Add(stateSet, closureState))
+            closure.states.map(closureState => set(stateMap, closureState, true))
         }
     })
     const resultStates: string[] = []
     let final = false
-    stateSet.forEach(state => {
+    stateMap.forEach((v, state) => {
         resultStates.push(state)
-        if (Has(finalStates, state)) {
+        if (Get(finalStates, state)) {
             final = true
         }
     })
@@ -105,11 +106,20 @@ function getFullState(states: string[], closures: Map<string, state>, finalState
 
 function getClosures(automaton: NonDeterministicAutomaton): Map<string, state> {
     const flatClosures = new Map<string, string[]>();
+    console.log(automaton.moves)
     automaton.states.map(state => (Get(automaton.moves, {state: state, symbol: 'e'}) ?? [])
-        .map(dstState => set(flatClosures, state, [...Get(flatClosures, state) ?? [], dstState])))
+        .map(dstState =>
+            set(
+                flatClosures,
+                state,
+                [...Get(flatClosures, state) ?? [], dstState]
+            )
+        )
+    )
     if (flatClosures.size === 0) {
         return new Map<string, state>();
     }
+    console.log(4353, flatClosures)
     while (recurse(flatClosures)) {
     }
     const result = new Map<string, state>();
@@ -119,7 +129,7 @@ function getClosures(automaton: NonDeterministicAutomaton): Map<string, state> {
             if (final) {
                 return
             }
-            if (Has(automaton.finalStates, closure)) {
+            if (Get(automaton.finalStates, closure)) {
                 final = true
             }
         })

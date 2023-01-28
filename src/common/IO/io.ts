@@ -13,7 +13,7 @@ import {
     MoveWithSignals, NonDeterministicAutomaton, NonDeterministicMoves,
     Rules
 } from "../model/models";
-import {Get, Set as set} from "../utils/maps";
+import {Get, Set, Set as set} from "../utils/maps";
 import {Add} from "../utils/sets";
 
 function ReadMealy(filename: string): Mealy {
@@ -49,7 +49,7 @@ function ReadGrammar(filename: string, grammarSide: GrammarSide): Grammar {
     const data = fs.readFileSync(filePath, 'utf-8').split(/\r?\n/)
 
     const nonTerminals: string[] = []
-    const uniqueTerminals = new Set<string>();
+    const uniqueTerminals = new Map<string, boolean>();
     const rules: Rules = new Map();
     data.map(line => {
         const rule = line.split(' -> ')
@@ -67,20 +67,20 @@ function ReadGrammar(filename: string, grammarSide: GrammarSide): Grammar {
                 dstNonTerminal = symbol[1]
                 terminal = symbol[0]
             }
-            Add(uniqueTerminals, terminal)
+            Set(uniqueTerminals, terminal, true)
             const k = {NonTerminal: sourceNonTerminal, Terminal: terminal}
             set(rules, k, [...(Get(rules, k) ?? []), dstNonTerminal])
         })
     })
 
     const terminalSymbols: string[] = []
-    uniqueTerminals.forEach(s => terminalSymbols.push(s))
+    uniqueTerminals.forEach((v, s) => terminalSymbols.push(s))
     return {nonTerminalSymbols: nonTerminals, rules: rules, side: grammarSide, terminalSymbols: terminalSymbols.sort()}
 }
 
 function ReadLines(filename: string): string[] {
     const filePath = path.resolve(filename)
-    return  fs.readFileSync(filePath, 'utf-8').split(/\r?\n/)
+    return fs.readFileSync(filePath, 'utf-8').split(/\r?\n/)
 }
 
 function WriteDeterministicAutomaton(filename: string, automaton: DeterministicAutomaton): void {
@@ -99,11 +99,11 @@ function ReadNonDeterministicAutomaton(filename: string): NonDeterministicAutoma
     }
 }
 
-function getFinalStates(signals: Map<string, string>): Set<string> {
-    const result = new Set<string>();
+function getFinalStates(signals: Map<string, string>): Map<string, boolean> {
+    const result = new Map<string, boolean>();
     signals.forEach((signal, state) => {
         if (signal === 'F') {
-            Add(result, state)
+            Set(result, state, true)
         }
     })
     return result
@@ -112,13 +112,20 @@ function getFinalStates(signals: Map<string, string>): Set<string> {
 function getNonDeterministicMoves(data: string[][], states: string[], inputSymbols: string[]): NonDeterministicMoves {
     const transposedData = transpose(data.slice(2))
     const result: NonDeterministicMoves = new Map();
-    transposedData.slice(1).map((stateWithMoves, i) => stateWithMoves.map((moves, j) => {
-        if (moves === '-') {
-            return
-        }
-        const k = {state: states[i], symbol: inputSymbols[j]}
-        moves.split(',').map(move => set(result, k, [...(Get(result, k) ?? []), move]))
-    }))
+    transposedData.slice(1).map((stateAndMove, i) => {
+        stateAndMove.map((moves, j) => {
+            if (moves !== '-' && moves !== '') {
+                const stateWithInput = {
+                    state: states[i],
+                    symbol: inputSymbols[j]
+                }
+                moves.split(',').map((move) => {
+                    const prev = Get(result, stateWithInput) ?? []
+                    set(result, stateWithInput, [...prev, move])
+                })
+            }
+        })
+    })
     return result
 }
 

@@ -47,7 +47,7 @@ type Grammar = {
 type NonDeterministicAutomaton = {
     states: string[]
     inputSymbols: string[]
-    finalStates: Set<string>
+    finalStates: Map<string, boolean>
     moves: NonDeterministicMoves
 }
 
